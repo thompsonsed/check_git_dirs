@@ -12,7 +12,7 @@ if __name__ == "__main__":
         rev_parse = check_output(["git", "status", "-s"], cwd=git_dir).decode("utf-8").splitlines()
         output_message = f"\033[1;34m{git_dir}: "
         if len(rev_parse) == 0:
-            git_status = check_output(["git", "status", "-s"], cwd=git_dir).decode("utf-8")
+            git_status = check_output(["git", "status"], cwd=git_dir).decode("utf-8")
             if "Your branch is ahead" in git_status:
                 output_message += "\033[1;33m - Requires push"
             else:
