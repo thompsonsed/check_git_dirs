@@ -16,7 +16,7 @@ if __name__ == "__main__":
             if "Your branch is ahead" in git_status:
                 output_message += "\033[1;33m - Requires push"
             else:
-                output_message += "\033[1;32m \u2713 All up to date"
+                output_message += "\033[1;32m \u2713"
         else:
             output_message += "\033[1;31m \u2717 Unstaged changes"
         print(output_message)
