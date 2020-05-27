@@ -50,4 +50,5 @@ if __name__ == "__main__":
     else:
         logging.getLogger().setLevel(30)
     scan_all_git_repos(pathlib.Path(args.dir))
+    logging.warning("\u001b[0mChecks completed")
 
