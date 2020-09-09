@@ -8,6 +8,7 @@ import argparse
 from subprocess import check_output, call
 import logging
 
+
 def scan_all_git_repos(directory: pathlib.Path):
     if not directory.exists():
         raise IOError(f"Directory does not exist at {directory}")
@@ -32,6 +33,7 @@ def scan_all_git_repos(directory: pathlib.Path):
         if len(rev_parse) > 10:
             logging.warning("\t\033[1;31m....")
 
+
 def dir_path(p: str):
     path = pathlib.Path(p)
     if path.is_dir():
@@ -39,16 +41,30 @@ def dir_path(p: str):
     else:
         raise NotADirectoryError(p)
 
+
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Check the status of git repos in all subdirectories of the given folder.")
-    parser.add_argument("-v", "--verbose", action="store_true", default=False, help="Print out information on all repositories (not just those with unstaged commits")
-    parser.add_argument("dir", nargs='?', default=".",help="Path to directory to parse in (defaults to current working directory", type=dir_path)
+    parser = argparse.ArgumentParser(
+        description="Check the status of git repos in all subdirectories of the given folder."
+    )
+    parser.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        default=False,
+        help="Print out information on all repositories (not just those with unstaged commits",
+    )
+    parser.add_argument(
+        "dir",
+        nargs="?",
+        default=".",
+        help="Path to directory to parse in (defaults to current working directory",
+        type=dir_path,
+    )
     args = parser.parse_args()
-    logging.basicConfig(format='%(message)s')
+    logging.basicConfig(format="%(message)s")
     if args.verbose:
         logging.getLogger().setLevel(20)
     else:
         logging.getLogger().setLevel(30)
     scan_all_git_repos(pathlib.Path(args.dir))
     logging.warning("\u001b[0mChecks completed")
-
