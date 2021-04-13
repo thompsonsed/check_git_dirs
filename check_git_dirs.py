@@ -85,8 +85,10 @@ if __name__ == "__main__":
     if total_unstaged != 0:
         logging.warning(f"\033[1;31mUnstaged changes: {total_unstaged}")
     if total_push != 0:
-        logging.warning(f"\033[1;33m[0mRequires push: {total_push}")
+        logging.warning(f"\033[1;33mRequires push: {total_push}")
     if grand_total == total_okay:
         logging.warning(f"\033[1;32mAll {total_okay} repositories okay.")
     else:
         logging.warning(f"\033[1;33m{total_okay}/{grand_total} okay")
+    
+
