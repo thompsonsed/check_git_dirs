@@ -57,7 +57,8 @@ def dir_path(p: str):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Check the status of git repos in all subdirectories of the given folder."
+        description="Check the status of git repos in all subdirectories of the given folder.",
+        usage="python check_git_dirs.py -v -b",
     )
     parser.add_argument(
         "-v",
@@ -90,5 +91,3 @@ if __name__ == "__main__":
         logging.warning(f"\033[1;32mAll {total_okay} repositories okay.")
     else:
         logging.warning(f"\033[1;33m{total_okay}/{grand_total} okay")
-    
-
