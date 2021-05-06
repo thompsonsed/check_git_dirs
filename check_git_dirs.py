@@ -10,7 +10,14 @@ from subprocess import check_output, call
 import logging
 
 
-def scan_all_git_repos(directory: pathlib.Path) -> Tuple[int, int, int]:
+def add_branch_label(record_branches: bool, git_status: str, output_message: str) -> str:
+    if record_branches:
+        branch_name = git_status.splitlines()[0].replace("On branch ", "")
+        return f"{output_message} - {branch_name}"
+    return output_message
+
+
+def scan_all_git_repos(directory: pathlib.Path, record_branches: bool = False) -> Tuple[int, int, int]:
     """
     Checks all git repositories in the path for those requiring an action.
 
@@ -27,18 +34,22 @@ def scan_all_git_repos(directory: pathlib.Path) -> Tuple[int, int, int]:
         git_dir = pathlib.Path(f).parent
         rev_parse = check_output(["git", "status", "-s"], cwd=git_dir).decode("utf-8").splitlines()
         output_message = f"\033[1;34m{git_dir}: "
+        git_status = check_output(["git", "status"], cwd=git_dir).decode("utf-8")
         if len(rev_parse) == 0:
-            git_status = check_output(["git", "status"], cwd=git_dir).decode("utf-8")
             if "Your branch is ahead" in git_status:
                 output_message += "\033[1;33m - Requires push"
                 total_push += 1
             else:
                 output_message += "\033[1;32m \u2713"
                 total_okay += 1
-            logging.info(output_message)
+            logging.info(
+                add_branch_label(record_branches=record_branches, git_status=git_status, output_message=output_message)
+            )
         else:
             output_message += "\033[1;31m \u2717 Unstaged changes"
-            logging.warning(output_message)
+            logging.warning(
+                add_branch_label(record_branches=record_branches, git_status=git_status, output_message=output_message)
+            )
             total_unstaged += 1
         for r in rev_parse[0:10]:
             logging.warning(f"\t\033[1;31m{r}")
@@ -71,8 +82,11 @@ if __name__ == "__main__":
         "dir",
         nargs="?",
         default=".",
-        help="Path to directory to parse in (defaults to current working directory",
+        help="Path to directory to parse in (defaults to current working directory)",
         type=dir_path,
+    )
+    parser.add_argument(
+        "-b", "--branch", action="store_true", default=False, help="Output the branch that each folder is currently on"
     )
     args = parser.parse_args()
     logging.basicConfig(format="%(message)s")
@@ -80,7 +94,7 @@ if __name__ == "__main__":
         logging.getLogger().setLevel(20)
     else:
         logging.getLogger().setLevel(30)
-    total_unstaged, total_push, total_okay = scan_all_git_repos(pathlib.Path(args.dir))
+    total_unstaged, total_push, total_okay = scan_all_git_repos(pathlib.Path(args.dir), args.branch)
     grand_total = total_unstaged + total_push + total_okay
     logging.warning("\033[1;32mChecks completed")
     if total_unstaged != 0:
