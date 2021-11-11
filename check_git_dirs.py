@@ -17,6 +17,16 @@ def add_branch_label(record_branches: bool, git_status: str, output_message: str
     return output_message
 
 
+def read_check_ignore(cur_dir: pathlib.Path) -> List[str]:
+    check_ignore_file = pathlib.Path(cur_dir, ".check_ignore")
+
+    if check_ignore_file.exists() and check_ignore_file.is_file():
+        with check_ignore_file.open("rt") as f:
+
+            return [x.strip() for x in f.readlines()]
+    return []
+
+
 def scan_all_git_repos(
     directory: pathlib.Path, record_branches: bool = False
 ) -> Tuple[int, int, int, List[str], List[str]]:
@@ -28,15 +38,24 @@ def scan_all_git_repos(
     """
     if not directory.exists():
         raise IOError(f"Directory does not exist at {directory}")
-    git_dirs = check_output(["find", str(directory), "-name", ".git"]).decode("utf-8").splitlines()
+    git_dirs = [
+        pathlib.Path(x).parent
+        for x in check_output(["find", str(directory), "-name", ".git"]).decode("utf-8").splitlines()
+    ]
+
+    ignore_names = read_check_ignore(directory)
+    if len(ignore_names) > 0:
+        ignore_dirs = [x for x in git_dirs if x.name in ignore_names]
+        git_dirs = [x for x in git_dirs if x.name not in ignore_names]
     logging.info(f"Found {len(git_dirs)} directories containing git repos.")
+    if len(ignore_dirs) > 0:
+        logging.info(f"Ignoring {len(ignore_dirs)} directories containing git repos.")
     total_push = 0
     total_okay = 0
     total_unstaged = 0
     unstaged_list = []
     push_list = []
-    for f in git_dirs:
-        git_dir = pathlib.Path(f).parent
+    for git_dir in git_dirs:
         rev_parse = check_output(["git", "status", "-s"], cwd=git_dir).decode("utf-8").splitlines()
         output_message = f"\033[1;34m{git_dir}: "
         git_status = check_output(["git", "status"], cwd=git_dir).decode("utf-8")
