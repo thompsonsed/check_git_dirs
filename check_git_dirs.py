@@ -47,6 +47,8 @@ def scan_all_git_repos(
     if len(ignore_names) > 0:
         ignore_dirs = [x for x in git_dirs if x.name in ignore_names]
         git_dirs = [x for x in git_dirs if x.name not in ignore_names]
+    else:
+        ignore_dirs = []
     logging.info(f"Found {len(git_dirs)} directories containing git repos.")
     if len(ignore_dirs) > 0:
         logging.info(f"Ignoring {len(ignore_dirs)} directories containing git repos.")
